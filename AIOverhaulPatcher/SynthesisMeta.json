@@ -1,0 +1,7 @@
+{
+  "Nickname": "AIOverhaulPatcher",
+  "Visibility": "Exclude",
+  "OneLineDescription": "Forwards AI Overhaul Edits",
+  "LongDescription": "",
+  "PreferredAutoVersioning": "Default"
+}
