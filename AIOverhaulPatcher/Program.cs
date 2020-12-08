@@ -22,7 +22,12 @@ namespace AIOverhaulPatcher
                         IdentifyingModKey = "AIOPatch.esp",
                         TargetRelease = GameRelease.SkyrimSE,
                         BlockAutomaticExit = true,
-                    }
+                    },
+                     ExclusionMods = new List<ModKey>() { 
+                         new ModKey("AIOPatch.esp", ModType.Plugin),
+                         new ModKey("Nemesis PCEA.esp", ModType.Plugin)
+
+                     }
                 });
         }
 
@@ -34,11 +39,10 @@ namespace AIOverhaulPatcher
             if (USLEEP!=null ) System.Console.WriteLine("Unofficial Skyrim Special Edition Patch.esp");
             var UsleepOrder = state.LoadOrder.GetFileOrder("Unofficial Skyrim Special Edition Patch.esp");
             System.Console.WriteLine("at " + UsleepOrder);
-            //Your code here!
+
 
             if (AIOverhaul == null)
             {
-                
                 System.Console.WriteLine("AIOverhaul.esp not found");
                 return;
             }
@@ -49,17 +53,17 @@ namespace AIOverhaulPatcher
             int processed = 0;
             int total = AIOverhaul.Npcs.Count;
 
-            var AIOFormIDs = AIOverhaul.Npcs.Select(x => x.FormKey.ID).ToList();
-            var winningOverrides = state.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>().Where(x => AIOFormIDs.Contains(x.FormKey.ID)).ToList();
-            var USLEEPandPrior = state.LoadOrder.PriorityOrder.Reverse().Take(UsleepOrder + 1).Select(x => x.Mod).ToList();
+            var AIOFormIDs = AIOverhaul.Npcs.Select(x => x.FormKey).ToList();
+            var winningOverrides = state.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>().Where(x => AIOFormIDs.Contains(x.FormKey)).ToList();
+            //var USLEEPandPrior = state.LoadOrder.PriorityOrder.Reverse().Take(UsleepOrder + 1).Select(x => x.Mod).ToList();
             var masterfilenames = AIOverhaul.MasterReferences.Select(x => x.Master.FileName).ToList();
             var MasterFiles = state.LoadOrder.PriorityOrder.Reverse().Where(x => masterfilenames.Contains(x.ModKey.FileName)).ToList();
-            var NPCMasters = MasterFiles.SelectMany(x => x.Mod?.GetTopLevelGroupGetter<INpcGetter>()).Select(x=>x.Value).Where(x => AIOFormIDs.Contains(x.FormKey.ID)).ToList();
+            var NPCMasters = MasterFiles.SelectMany(x => x.Mod?.GetTopLevelGroupGetter<INpcGetter>()).Select(x=>x.Value).Where(x => AIOFormIDs.Contains(x.FormKey)).ToList();
 
-            var allOverrides = state.LoadOrder.PriorityOrder.Reverse().Skip(UsleepOrder + 1).Select(x => x.Mod).SelectMany(x => x?.GetTopLevelGroupGetter<INpcGetter>()).Where(x => AIOFormIDs.Contains(x.Value.FormKey.ID)).Select(x => x.Value).ToList();
+            var allOverrides = state.LoadOrder.PriorityOrder.Reverse().Skip(UsleepOrder + 1).Select(x => x.Mod).SelectMany(x => x?.GetTopLevelGroupGetter<INpcGetter>()).Where(x => AIOFormIDs.Contains(x.Value.FormKey)).Select(x => x.Value).ToList();
          
 
-        System.Console.WriteLine(processed + "/" + total + " Npcs");
+            System.Console.WriteLine(processed + "/" + total + " Npcs");
             foreach (var npc in AIOverhaul.Npcs)
             {
 
@@ -69,11 +73,11 @@ namespace AIOverhaulPatcher
                     System.Console.WriteLine(processed + "/" + total + " Npcs");
                 }
 
-                var winningOverride = winningOverrides.Where(x => x.FormKey.ID == npc.FormKey.ID).FirstOrDefault();
-                var Masters = NPCMasters.Where(x => x.FormKey.ID == npc.FormKey.ID).ToList();
+                var winningOverride = winningOverrides.Where(x => x.FormKey == npc.FormKey).FirstOrDefault();
+                var Masters = NPCMasters.Where(x => x.FormKey == npc.FormKey).ToList();
                 var winningMaster = Masters.FirstOrDefault();
-                if (winningMaster == null) winningMaster = state.LoadOrder.PriorityOrder.Select(x => x.Mod).SelectMany(x => x?.GetTopLevelGroupGetter<INpcGetter>()).Where(x => x.Value.FormKey.ID == npc.FormKey.ID).Select(x => x.Value).First();
-                var overrides = allOverrides.Where(x => x.FormKey.ID == npc.FormKey.ID).ToList();
+                if (winningMaster == null) winningMaster = state.LoadOrder.PriorityOrder.Select(x => x.Mod).SelectMany(x => x?.GetTopLevelGroupGetter<INpcGetter>()).Where(x => x.Value.FormKey == npc.FormKey).Select(x => x.Value).First();
+                var overrides = allOverrides.Where(x => x.FormKey == npc.FormKey).ToList();
 
                 var patchNpc = state.PatchMod.Npcs.GetOrAddAsOverride(winningOverride);
                 if (winningOverride != npc)
@@ -81,25 +85,25 @@ namespace AIOverhaulPatcher
                     if (npc.IsProtected()) patchNpc.Configuration.Flags.SetProtected(true, true);
 
                     foreach (var fac in npc.Factions)
-                        if (!patchNpc.Factions.Select(x => new KeyValuePair<uint,int> (x.Faction.FormKey.ID , x.Rank)).Contains(new KeyValuePair<uint, int>(fac.Faction.FormKey.ID, fac.Rank)))
+                        if (!patchNpc.Factions.Select(x => new KeyValuePair<FormKey,int> (x.Faction.FormKey , x.Rank)).Contains(new KeyValuePair<FormKey, int>(fac.Faction.FormKey, fac.Rank)))
                         {
                             patchNpc.Factions.Add(  fac.DeepCopy());
                         }
 
                      
-                    var PackagesToRemove = Masters.SelectMany(x=>x.Packages).Select(x=>x.FormKey.ID).Where(x => !npc.Packages.Select(x=>x.FormKey.ID).Contains(x)).ToList();
+                    var PackagesToRemove = Masters.SelectMany(x=>x.Packages).Select(x=>x.FormKey).Where(x => !npc.Packages.Select(x=>x.FormKey).Contains(x)).ToHashSet<FormKey>();
 
-                    List<FormKey> PackagesToAdd = overrides.SelectMany(x => x.Packages).Select(x => x.FormKey).Where(x => !PackagesToRemove.Contains(x.ID)).Distinct().ToList();
+                    var PackagesToAdd = overrides.SelectMany(x => x.Packages).Select(x => x.FormKey).Where(x => !PackagesToRemove.Contains(x)).Distinct().ToList();
 
                     patchNpc.Packages.Clear();
                     PackagesToAdd.ForEach(x => patchNpc.Packages.Add(x));
 
 
-                    var OverwrittenOutfits = Masters.Select(x => x.DefaultOutfit).Select(x => x.FormKey.HasValue ? x.FormKey.Value.ID : 0).Distinct().ToList();
-                    var OverwrittenSleepingOutfit = Masters.Select(x => x.SleepingOutfit).Select(x => x.FormKey.HasValue ? x.FormKey.Value.ID : 0).Distinct().ToList();
+                    var OverwrittenOutfits = Masters.Select(x => x.DefaultOutfit).Select(x => x.FormKey ).Distinct().ToHashSet<FormKey>();
+                    var OverwrittenSleepingOutfit = Masters.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Distinct().ToHashSet<FormKey>();
 
-                    FormKey? OverwrittingOutfit = overrides.Select(x => x.DefaultOutfit).Select(x => x.FormKey).Where(x => x != null && !OverwrittenOutfits.Contains(x.Value.ID)).Prepend(npc.DefaultOutfit.FormKey).Last();
-                    FormKey? OverwrittingSleepingOutfit = overrides.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Where(x => x != null && !OverwrittenSleepingOutfit.Contains(x.Value.ID)).Prepend(npc.SleepingOutfit.FormKey).Last();
+                    FormKey? OverwrittingOutfit = overrides.Select(x => x.DefaultOutfit).Select(x => x.FormKey).Where(x => x != null && !OverwrittenOutfits.Contains(x)).Prepend(npc.DefaultOutfit.FormKey).Last();
+                    FormKey? OverwrittingSleepingOutfit = overrides.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Where(x => x != null && !OverwrittenSleepingOutfit.Contains(x)).Prepend(npc.SleepingOutfit.FormKey).Last();
 
                     patchNpc.DefaultOutfit = OverwrittingOutfit;
                     patchNpc.SleepingOutfit = OverwrittingSleepingOutfit;
@@ -130,9 +134,7 @@ namespace AIOverhaulPatcher
                 b++;
                 processed++;
             }
-
-
-
+            state.PatchMod.ModHeader.Flags = state.PatchMod.ModHeader.Flags | SkyrimModHeader.HeaderFlag.LightMaster;
         }
     }
 }
