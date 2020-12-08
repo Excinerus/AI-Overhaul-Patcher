@@ -9,7 +9,7 @@ namespace AIOverhaulPatcher
 {
     public class Program
     {
-
+        const string AioPatchName = "AIOPatch.esp";
         public static int Main(string[] args)
         {
             return SynthesisPipeline.Instance.Patch<ISkyrimMod, ISkyrimModGetter>(
@@ -19,12 +19,12 @@ namespace AIOverhaulPatcher
                 {
                     ActionsForEmptyArgs = new RunDefaultPatcher()
                     {
-                        IdentifyingModKey = "AIOPatch.esp",
+                        IdentifyingModKey = AioPatchName,
                         TargetRelease = GameRelease.SkyrimSE,
                         BlockAutomaticExit = true,
                     },
                      ExclusionMods = new List<ModKey>() { 
-                         new ModKey("AIOPatch.esp", ModType.Plugin),
+                         new ModKey(AioPatchName, ModType.Plugin),
                          new ModKey("Nemesis PCEA.esp", ModType.Plugin)
 
                      }
@@ -134,7 +134,10 @@ namespace AIOverhaulPatcher
                 b++;
                 processed++;
             }
-            state.PatchMod.ModHeader.Flags = state.PatchMod.ModHeader.Flags | SkyrimModHeader.HeaderFlag.LightMaster;
+            if (state.PatchMod.ModKey.Name == AioPatchName)
+            {
+                state.PatchMod.ModHeader.Flags = state.PatchMod.ModHeader.Flags | SkyrimModHeader.HeaderFlag.LightMaster;
+            }
         }
     }
 }
