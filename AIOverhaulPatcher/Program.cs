@@ -95,11 +95,11 @@ namespace AIOverhaulPatcher
                     PackagesToAdd.ForEach(x => patchNpc.Packages.Add(x));
 
 
-                    var OverwrittenOutfits = Masters.Select(x => x.DefaultOutfit).Select(x => x.FormKey.HasValue ? x.FormKey.Value.ID : 0).Distinct().ToList();
-                    var OverwrittenSleepingOutfit = Masters.Select(x => x.SleepingOutfit).Select(x => x.FormKey.HasValue ? x.FormKey.Value.ID : 0).Distinct().ToList();
+                    var OverwrittenOutfits = Masters.Select(x => x.DefaultOutfit).Select(x => x.FormKeyNullable.HasValue ? x.FormKeyNullable.Value.ID : 0).Distinct().ToList();
+                    var OverwrittenSleepingOutfit = Masters.Select(x => x.SleepingOutfit).Select(x => x.FormKeyNullable.HasValue ? x.FormKeyNullable.Value.ID : 0).Distinct().ToList();
 
-                    FormKey? OverwrittingOutfit = overrides.Select(x => x.DefaultOutfit).Select(x => x.FormKey).Where(x => x != null && !OverwrittenOutfits.Contains(x.Value.ID)).Prepend(npc.DefaultOutfit.FormKey).Last();
-                    FormKey? OverwrittingSleepingOutfit = overrides.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Where(x => x != null && !OverwrittenSleepingOutfit.Contains(x.Value.ID)).Prepend(npc.SleepingOutfit.FormKey).Last();
+                    FormKey? OverwrittingOutfit = overrides.Select(x => x.DefaultOutfit).Select(x => x.FormKeyNullable).Where(x => x != null && !OverwrittenOutfits.Contains(x.Value.ID)).Prepend(npc.DefaultOutfit.FormKey).Last();
+                    FormKey? OverwrittingSleepingOutfit = overrides.Select(x => x.SleepingOutfit).Select(x => x.FormKeyNullable).Where(x => x != null && !OverwrittenSleepingOutfit.Contains(x.Value.ID)).Prepend(npc.SleepingOutfit.FormKey).Last();
 
                     patchNpc.DefaultOutfit = OverwrittingOutfit;
                     patchNpc.SleepingOutfit = OverwrittingSleepingOutfit;
