@@ -102,14 +102,14 @@ namespace AIOverhaulPatcher
                     var OverwrittenOutfits = Masters.Select(x => x.DefaultOutfit).Select(x => x.FormKey ).Distinct().ToHashSet<FormKey>();
                     var OverwrittenSleepingOutfit = Masters.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Distinct().ToHashSet<FormKey>();
 
-                    FormKey? OverwrittingOutfit = overrides.Select(x => x.DefaultOutfit).Select(x => x.FormKey).Where(x => x != null && !OverwrittenOutfits.Contains(x)).Prepend(npc.DefaultOutfit.FormKey).Last();
-                    FormKey? OverwrittingSleepingOutfit = overrides.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Where(x => x != null && !OverwrittenSleepingOutfit.Contains(x)).Prepend(npc.SleepingOutfit.FormKey).Last();
+                    FormKey? OverwrittingOutfit = overrides.Select(x => x.DefaultOutfit).Select(x => x.FormKey).Where(x => !x.IsNull && !OverwrittenOutfits.Contains(x)).Prepend(npc.DefaultOutfit.FormKey).LastOrDefault();
+                    FormKey? OverwrittingSleepingOutfit = overrides.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Where(x => !x.IsNull && !OverwrittenSleepingOutfit.Contains(x)).Prepend(npc.SleepingOutfit.FormKey).LastOrDefault();
 
-                    patchNpc.DefaultOutfit = OverwrittingOutfit;
-                    patchNpc.SleepingOutfit = OverwrittingSleepingOutfit;
+                    patchNpc.DefaultOutfit = (OverwrittingOutfit.HasValue && !OverwrittingOutfit.Value.IsNull)? OverwrittingOutfit : null;
+                    patchNpc.SleepingOutfit = (OverwrittingSleepingOutfit.HasValue && !OverwrittingSleepingOutfit.Value.IsNull) ? OverwrittingSleepingOutfit : null;
 
-                    patchNpc.SpectatorOverridePackageList = npc.SpectatorOverridePackageList.FormKey;
-                    patchNpc.CombatOverridePackageList = npc.CombatOverridePackageList.FormKey;
+                    patchNpc.SpectatorOverridePackageList = npc.SpectatorOverridePackageList;
+                    patchNpc.CombatOverridePackageList = npc.CombatOverridePackageList;
                     patchNpc.AIData.Confidence = (Confidence)Math.Min((int)patchNpc.AIData.Confidence, (int)npc.AIData.Confidence);
 
 
