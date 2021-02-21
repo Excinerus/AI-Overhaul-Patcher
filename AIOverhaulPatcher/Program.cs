@@ -6,34 +6,29 @@ using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Skyrim;
 using AIOverhaulPatcher.Utilities;
 using Noggog;
+using System.Threading.Tasks;
 
 namespace AIOverhaulPatcher
 {
     public class Program
     {
         const string AioPatchName = "AIOPatch.esp";
-        public static int Main(string[] args)
+        public static Task<int> Main(string[] args)
         {
-            return SynthesisPipeline.Instance.Patch<ISkyrimMod, ISkyrimModGetter>(
-                args: args,
-                patcher: RunPatch,
-                userPreferences: new UserPreferences()
+            return SynthesisPipeline.Instance
+                .AddPatch<ISkyrimMod, ISkyrimModGetter>(RunPatch, new PatcherPreferences()
                 {
-                    ActionsForEmptyArgs = new RunDefaultPatcher()
+                    ExclusionMods = new List<ModKey>() 
                     {
-                        IdentifyingModKey = AioPatchName,
-                        TargetRelease = GameRelease.SkyrimSE,
-                        BlockAutomaticExit = true,
-                    },
-                     ExclusionMods = new List<ModKey>() { 
                          new ModKey(AioPatchName, ModType.Plugin),
                          new ModKey("Nemesis PCEA.esp", ModType.Plugin)
-
-                     }
-                });
+                    }
+                })
+                .SetTypicalOpen(GameRelease.SkyrimSE, AioPatchName)
+                .Run(args);
         }
 
-        public static void RunPatch(SynthesisState<ISkyrimMod, ISkyrimModGetter> state)
+        public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
 
             var AIOverhaul = state.LoadOrder.GetModByFileName( "AI Overhaul.esp");
@@ -107,11 +102,11 @@ namespace AIOverhaulPatcher
                     FormKey? OverwrittingOutfit = overrides.Select(x => x.DefaultOutfit).Select(x => x.FormKey).Where(x => !x.IsNull && !OverwrittenOutfits.Contains(x)).Prepend(npc.DefaultOutfit.FormKey).LastOrDefault();
                     FormKey? OverwrittingSleepingOutfit = overrides.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Where(x => !x.IsNull && !OverwrittenSleepingOutfit.Contains(x)).Prepend(npc.SleepingOutfit.FormKey).LastOrDefault();
 
-                    patchNpc.DefaultOutfit = (OverwrittingOutfit.HasValue && !OverwrittingOutfit.Value.IsNull)? OverwrittingOutfit : null;
-                    patchNpc.SleepingOutfit = (OverwrittingSleepingOutfit.HasValue && !OverwrittingSleepingOutfit.Value.IsNull) ? OverwrittingSleepingOutfit : null;
+                    patchNpc.DefaultOutfit.SetTo(OverwrittingOutfit);
+                    patchNpc.SleepingOutfit.SetTo(OverwrittingSleepingOutfit);
 
-                    patchNpc.SpectatorOverridePackageList = npc.SpectatorOverridePackageList;
-                    patchNpc.CombatOverridePackageList = npc.CombatOverridePackageList;
+                    patchNpc.SpectatorOverridePackageList.SetTo(npc.SpectatorOverridePackageList);
+                    patchNpc.CombatOverridePackageList.SetTo(npc.CombatOverridePackageList);
                     patchNpc.AIData.Confidence = (Confidence)Math.Min((int)patchNpc.AIData.Confidence, (int)npc.AIData.Confidence);
 
 
