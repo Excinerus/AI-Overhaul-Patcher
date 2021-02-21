@@ -5,6 +5,8 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Skyrim;
 using AIOverhaulPatcher.Utilities;
+using Noggog;
+
 namespace AIOverhaulPatcher
 {
     public class Program
@@ -58,9 +60,9 @@ namespace AIOverhaulPatcher
             //var USLEEPandPrior = state.LoadOrder.PriorityOrder.Reverse().Take(UsleepOrder + 1).Select(x => x.Mod).ToList();
             var masterfilenames = AIOverhaul.MasterReferences.Select(x => x.Master.FileName).ToList();
             var MasterFiles = state.LoadOrder.PriorityOrder.Reverse().Where(x => masterfilenames.Contains(x.ModKey.FileName)).ToList();
-            var NPCMasters = MasterFiles.SelectMany(x => x.Mod?.GetTopLevelGroupGetter<INpcGetter>()).Select(x=>x.Value).Where(x => AIOFormIDs.Contains(x.FormKey)).ToList();
+            var NPCMasters = MasterFiles.Select(x => x.Mod).NotNull().SelectMany(x => x.Npcs).Where(x => AIOFormIDs.Contains(x.FormKey)).ToList();
 
-            var allOverrides = state.LoadOrder.PriorityOrder.Reverse().Skip(UsleepOrder + 1).Select(x => x.Mod).SelectMany(x => x?.GetTopLevelGroupGetter<INpcGetter>()).Where(x => AIOFormIDs.Contains(x.Value.FormKey)).Select(x => x.Value).ToList();
+            var allOverrides = state.LoadOrder.PriorityOrder.Reverse().Skip(UsleepOrder + 1).Select(x => x.Mod).NotNull().SelectMany(x => x.Npcs).Where(x => AIOFormIDs.Contains(x.FormKey)).ToList();
          
 
             System.Console.WriteLine(processed + "/" + total + " Npcs");
@@ -73,10 +75,10 @@ namespace AIOverhaulPatcher
                     System.Console.WriteLine(processed + "/" + total + " Npcs");
                 }
 
-                var winningOverride = winningOverrides.Where(x => x.FormKey == npc.FormKey).FirstOrDefault();
+                var winningOverride = winningOverrides.Where(x => x.FormKey == npc.FormKey).First();
                 var Masters = NPCMasters.Where(x => x.FormKey == npc.FormKey).ToList();
                 var winningMaster = Masters.FirstOrDefault();
-                if (winningMaster == null) winningMaster = state.LoadOrder.PriorityOrder.Select(x => x.Mod).SelectMany(x => x?.GetTopLevelGroupGetter<INpcGetter>()).Where(x => x.Value.FormKey == npc.FormKey).Select(x => x.Value).First();
+                if (winningMaster == null) winningMaster = state.LoadOrder.PriorityOrder.Select(x => x.Mod).NotNull().SelectMany(x => x.Npcs).Where(x => x.FormKey == npc.FormKey).First();
                 var overrides = allOverrides.Where(x => x.FormKey == npc.FormKey).ToList();
 
                 var patchNpc = state.PatchMod.Npcs.GetOrAddAsOverride(winningOverride);
