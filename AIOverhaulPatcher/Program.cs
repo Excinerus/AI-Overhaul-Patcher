@@ -5,33 +5,30 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Skyrim;
 using AIOverhaulPatcher.Utilities;
+using Noggog;
+using System.Threading.Tasks;
+
 namespace AIOverhaulPatcher
 {
     public class Program
     {
         const string AioPatchName = "AIOPatch.esp";
-        public static int Main(string[] args)
+        public static Task<int> Main(string[] args)
         {
-            return SynthesisPipeline.Instance.Patch<ISkyrimMod, ISkyrimModGetter>(
-                args: args,
-                patcher: RunPatch,
-                userPreferences: new UserPreferences()
+            return SynthesisPipeline.Instance
+                .AddPatch<ISkyrimMod, ISkyrimModGetter>(RunPatch, new PatcherPreferences()
                 {
-                    ActionsForEmptyArgs = new RunDefaultPatcher()
+                    ExclusionMods = new List<ModKey>() 
                     {
-                        IdentifyingModKey = AioPatchName,
-                        TargetRelease = GameRelease.SkyrimSE,
-                        BlockAutomaticExit = true,
-                    },
-                     ExclusionMods = new List<ModKey>() { 
                          new ModKey(AioPatchName, ModType.Plugin),
                          new ModKey("Nemesis PCEA.esp", ModType.Plugin)
-
-                     }
-                });
+                    }
+                })
+                .SetTypicalOpen(GameRelease.SkyrimSE, AioPatchName)
+                .Run(args);
         }
 
-        public static void RunPatch(SynthesisState<ISkyrimMod, ISkyrimModGetter> state)
+        public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
 
             var AIOverhaul = state.LoadOrder.GetModByFileName( "AI Overhaul.esp");
@@ -58,9 +55,9 @@ namespace AIOverhaulPatcher
             //var USLEEPandPrior = state.LoadOrder.PriorityOrder.Reverse().Take(UsleepOrder + 1).Select(x => x.Mod).ToList();
             var masterfilenames = AIOverhaul.MasterReferences.Select(x => x.Master.FileName).ToList();
             var MasterFiles = state.LoadOrder.PriorityOrder.Reverse().Where(x => masterfilenames.Contains(x.ModKey.FileName)).ToList();
-            var NPCMasters = MasterFiles.SelectMany(x => x.Mod?.GetTopLevelGroupGetter<INpcGetter>()).Select(x=>x.Value).Where(x => AIOFormIDs.Contains(x.FormKey)).ToList();
+            var NPCMasters = MasterFiles.Select(x => x.Mod).NotNull().SelectMany(x => x.Npcs).Where(x => AIOFormIDs.Contains(x.FormKey)).ToList();
 
-            var allOverrides = state.LoadOrder.PriorityOrder.Reverse().Skip(UsleepOrder + 1).Select(x => x.Mod).SelectMany(x => x?.GetTopLevelGroupGetter<INpcGetter>()).Where(x => AIOFormIDs.Contains(x.Value.FormKey)).Select(x => x.Value).ToList();
+            var allOverrides = state.LoadOrder.PriorityOrder.Reverse().Skip(UsleepOrder + 1).Select(x => x.Mod).NotNull().SelectMany(x => x.Npcs).Where(x => AIOFormIDs.Contains(x.FormKey)).ToList();
          
 
             System.Console.WriteLine(processed + "/" + total + " Npcs");
@@ -73,10 +70,10 @@ namespace AIOverhaulPatcher
                     System.Console.WriteLine(processed + "/" + total + " Npcs");
                 }
 
-                var winningOverride = winningOverrides.Where(x => x.FormKey == npc.FormKey).FirstOrDefault();
+                var winningOverride = winningOverrides.Where(x => x.FormKey == npc.FormKey).First();
                 var Masters = NPCMasters.Where(x => x.FormKey == npc.FormKey).ToList();
                 var winningMaster = Masters.FirstOrDefault();
-                if (winningMaster == null) winningMaster = state.LoadOrder.PriorityOrder.Select(x => x.Mod).SelectMany(x => x?.GetTopLevelGroupGetter<INpcGetter>()).Where(x => x.Value.FormKey == npc.FormKey).Select(x => x.Value).First();
+                if (winningMaster == null) winningMaster = state.LoadOrder.PriorityOrder.Select(x => x.Mod).NotNull().SelectMany(x => x.Npcs).Where(x => x.FormKey == npc.FormKey).First();
                 var overrides = allOverrides.Where(x => x.FormKey == npc.FormKey).ToList();
 
                 var patchNpc = state.PatchMod.Npcs.GetOrAddAsOverride(winningOverride);
@@ -105,11 +102,11 @@ namespace AIOverhaulPatcher
                     FormKey? OverwrittingOutfit = overrides.Select(x => x.DefaultOutfit).Select(x => x.FormKey).Where(x => !x.IsNull && !OverwrittenOutfits.Contains(x)).Prepend(npc.DefaultOutfit.FormKey).LastOrDefault();
                     FormKey? OverwrittingSleepingOutfit = overrides.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Where(x => !x.IsNull && !OverwrittenSleepingOutfit.Contains(x)).Prepend(npc.SleepingOutfit.FormKey).LastOrDefault();
 
-                    patchNpc.DefaultOutfit = (OverwrittingOutfit.HasValue && !OverwrittingOutfit.Value.IsNull)? OverwrittingOutfit : null;
-                    patchNpc.SleepingOutfit = (OverwrittingSleepingOutfit.HasValue && !OverwrittingSleepingOutfit.Value.IsNull) ? OverwrittingSleepingOutfit : null;
+                    patchNpc.DefaultOutfit.SetTo(OverwrittingOutfit);
+                    patchNpc.SleepingOutfit.SetTo(OverwrittingSleepingOutfit);
 
-                    patchNpc.SpectatorOverridePackageList = npc.SpectatorOverridePackageList;
-                    patchNpc.CombatOverridePackageList = npc.CombatOverridePackageList;
+                    patchNpc.SpectatorOverridePackageList.SetTo(npc.SpectatorOverridePackageList);
+                    patchNpc.CombatOverridePackageList.SetTo(npc.CombatOverridePackageList);
                     patchNpc.AIData.Confidence = (Confidence)Math.Min((int)patchNpc.AIData.Confidence, (int)npc.AIData.Confidence);
 
 
