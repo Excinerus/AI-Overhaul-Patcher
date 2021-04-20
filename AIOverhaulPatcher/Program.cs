@@ -103,7 +103,7 @@ namespace AIOverhaulPatcher
                     FormKey? OverwrittingSleepingOutfit = overrides.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Where(x => !x.IsNull && !OverwrittenSleepingOutfit.Contains(x)).Prepend(npc.SleepingOutfit.FormKey).LastOrDefault();
 
                     patchNpc.DefaultOutfit.SetTo(OverwrittingOutfit);
-                    if (OverwrittingSleepingOutfit!=null) patchNpc.SleepingOutfit.SetTo(OverwrittingSleepingOutfit);
+                    if (OverwrittingSleepingOutfit!=0) patchNpc.SleepingOutfit.SetTo(OverwrittingSleepingOutfit);
 
                     patchNpc.SpectatorOverridePackageList.SetTo(npc.SpectatorOverridePackageList);
                     patchNpc.CombatOverridePackageList.SetTo(npc.CombatOverridePackageList);
