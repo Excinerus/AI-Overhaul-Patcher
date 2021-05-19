@@ -3,5 +3,8 @@
   "Visibility": "Visible",
   "OneLineDescription": "Forwards AI Overhaul Edits",
   "LongDescription": "- Forwards Packages from AIO, keeps packages added by later loaded mods that were not removed by USEEP or AIO. \r\n- Forwards observe and combat package lists from AIO. \r\n- Adds AIO added factions to the latest winning override set of factions. \r\n- Forwards the maximum Essential/Protected status present at AIO or later loaded plugins.\r\n- Forwards minimum confidence level present at AIO or later loaded plugins. Uses the latest loaded outfits that were not overwritten or removed by AIO or USEEP",
-  "PreferredAutoVersioning": "Default"
+  "PreferredAutoVersioning": "Default",
+  "RequiredMods": [
+    "AI Overhaul.esp"
+  ]
 }

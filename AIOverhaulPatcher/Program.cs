@@ -102,11 +102,26 @@ namespace AIOverhaulPatcher
                     FormKey? OverwrittingOutfit = overrides.Select(x => x.DefaultOutfit).Select(x => x.FormKey).Where(x => !x.IsNull && !OverwrittenOutfits.Contains(x)).Prepend(npc.DefaultOutfit.FormKey).LastOrDefault();
                     FormKey? OverwrittingSleepingOutfit = overrides.Select(x => x.SleepingOutfit).Select(x => x.FormKey).Where(x => !x.IsNull && !OverwrittenSleepingOutfit.Contains(x)).Prepend(npc.SleepingOutfit.FormKey).LastOrDefault();
 
-                    patchNpc.DefaultOutfit.SetTo(OverwrittingOutfit);
-                    patchNpc.SleepingOutfit.SetTo(OverwrittingSleepingOutfit);
+                    if (OverwrittingOutfit.HasValue && !OverwrittingOutfit.Value.IsNull)
+                        patchNpc.DefaultOutfit.SetTo(OverwrittingOutfit);
+                    else
+                        patchNpc.DefaultOutfit.SetToNull();
 
-                    patchNpc.SpectatorOverridePackageList.SetTo(npc.SpectatorOverridePackageList);
-                    patchNpc.CombatOverridePackageList.SetTo(npc.CombatOverridePackageList);
+                    if (OverwrittingSleepingOutfit.HasValue && !OverwrittingSleepingOutfit.Value.IsNull)
+                        patchNpc.SleepingOutfit.SetTo(OverwrittingSleepingOutfit);
+                    else
+                        patchNpc.SleepingOutfit.SetToNull();
+
+                    if (!npc.SpectatorOverridePackageList.IsNull)
+                        patchNpc.SpectatorOverridePackageList.SetTo(npc.SpectatorOverridePackageList);
+                    else
+                        patchNpc.SpectatorOverridePackageList.SetToNull();
+
+                    if (!npc.CombatOverridePackageList.IsNull)
+                        patchNpc.CombatOverridePackageList.SetTo(npc.CombatOverridePackageList);
+                    else
+                        patchNpc.CombatOverridePackageList.SetToNull();
+
                     patchNpc.AIData.Confidence = (Confidence)Math.Min((int)patchNpc.AIData.Confidence, (int)npc.AIData.Confidence);
 
 
