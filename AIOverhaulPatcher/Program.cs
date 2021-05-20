@@ -63,6 +63,7 @@ namespace AIOverhaulPatcher
             System.Console.WriteLine(processed + "/" + total + " Npcs");
             foreach (var npc in AIOverhaul.Npcs)
             {
+                if (new List<uint>() { 7, 14 }.Contains(npc.FormKey.ID)) continue;
 
                 if (b >= bmax)
                 {
@@ -107,10 +108,11 @@ namespace AIOverhaulPatcher
 
                     if (PackagesToAdd.Count > 0 || PackagesToRemove.Count > 0)
                     {
+                        var aioOrder = npc.Packages.Select(x => x.FormKey).ToList();
                         patchNpc.Packages.Clear();
-                        PackagesToAdd.ForEach(x => patchNpc.Packages.Add(x));
-
-                    }
+                        PackagesToAdd.OrderBy(x => npc.Packages.Contains(x) ? aioOrder.IndexOf(x)  : (npc.Packages.Count + PackagesToAdd.IndexOf(x))).ForEach(x => patchNpc.Packages.Add(x));
+                        
+                    } 
                 }
 
 
