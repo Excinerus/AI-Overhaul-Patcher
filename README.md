@@ -7,4 +7,4 @@ A Synthethis patcher for AI Overhaul SE https://www.nexusmods.com/skyrimspeciale
 - Forwards minimum confidence level present at AIO or later loaded plugins
 - Uses the latest loaded outfits that were not overwritten or removed by AIO or USEEP
 
-Get Synthesis https://github.com/Noggog/Synthesis
+Get Synthesis https://github.com/Mutagen-Modding/Synthesis/wiki/Installation
