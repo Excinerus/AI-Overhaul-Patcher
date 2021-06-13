@@ -7,6 +7,7 @@ using Mutagen.Bethesda.Skyrim;
 using AIOverhaulPatcher.Utilities;
 using Noggog;
 using System.Threading.Tasks;
+using Mutagen.Bethesda.Plugins; 
 
 namespace AIOverhaulPatcher
 {
@@ -84,7 +85,7 @@ namespace AIOverhaulPatcher
                 var patchNpc = state.PatchMod.Npcs.GetOrAddAsOverride(winningOverride);
                 if (npc.IsProtected() && !(patchNpc.IsProtected() || patchNpc.IsEssential()))
                 {
-                    patchNpc.Configuration.Flags.SetProtected(true, true);
+                    patchNpc.Configuration.Flags.SetFlag(NpcConfiguration.Flag.Protected, true);
                     change = true;
 
 
