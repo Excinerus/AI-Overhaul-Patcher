@@ -8,3 +8,14 @@ A Synthethis patcher for AI Overhaul SE https://www.nexusmods.com/skyrimspeciale
 - Uses the latest loaded outfits that were not overwritten or removed by AIO or USEEP
 
 Get Synthesis https://github.com/Mutagen-Modding/Synthesis/wiki/Installation
+
+Settings :
+-Ignore Identical To LastOverride
+	Default = false
+	When enabled the patcher will not override NPCs that are already patched.
+-IgnorePlayerRecord
+	Default = true
+	When enabled the patcher will ignore the player record (00000007).
+-MaintainHighestProtectionLevel
+	Default = true
+	When enabled NPCs that are set to Essential or Protected by other mods will maintain the highest protection level.
