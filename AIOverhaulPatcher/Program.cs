@@ -89,7 +89,7 @@ namespace AIOverhaulPatcher
                 var patchNpc = state.PatchMod.Npcs.GetOrAddAsOverride(winningOverride);
                 if (npc.IsProtected() && !(patchNpc.IsProtected() || (patchNpc.IsEssential() && _settings.Value.MaintainHighestProtectionLevel)))
                 {
-                    patchNpc.Configuration.Flags.SetFlag(NpcConfiguration.Flag.Protected, true);
+                    patchNpc.Configuration.Flags = patchNpc.Configuration.Flags.SetFlag(NpcConfiguration.Flag.Protected, true);
                     change = true;
 
 
