@@ -5,8 +5,8 @@
     <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
 	</PropertyGroup>
 	<ItemGroup>
-    <PackageReference Include="Mutagen.Bethesda" Version="0.30.3" />
-    <PackageReference Include="Mutagen.Bethesda.Synthesis" Version="0.19.1" />
+    <PackageReference Include="Mutagen.Bethesda" Version="0.35.1" />
+    <PackageReference Include="Mutagen.Bethesda.Synthesis" Version="0.21.4" />
     <PackageReference Include="Mutagen.Bethesda.FormKeys.SkyrimSE" Version="2.1.0" />
 	</ItemGroup>
 </Project>
