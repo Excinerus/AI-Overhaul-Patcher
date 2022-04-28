@@ -171,6 +171,29 @@ namespace AIOverhaulPatcher
 
                 }
 
+                if (npc.ObserveDeadBodyOverridePackageList != patchNpc.ObserveDeadBodyOverridePackageList)
+                {
+                    patchNpc.ObserveDeadBodyOverridePackageList.SetTo(npc.ObserveDeadBodyOverridePackageList);
+                    change = true;
+                }
+
+                if (npc.Items!=null)
+                {
+                    if (patchNpc.Items == null )
+                    {
+                        patchNpc.Items  = new ExtendedList<ContainerEntry>();
+                    }
+                    foreach (var item in npc.Items)
+                    {
+                        if (!patchNpc.Items.Contains(item))
+                        {
+                            patchNpc.Items.Add(item.DeepCopy());
+                            change = true;
+                        }
+                    } 
+                } 
+
+
                 if (npc.AIData.Confidence != patchNpc.AIData.Confidence)
                 {
                     patchNpc.AIData.Confidence = (Confidence)Math.Min((int)patchNpc.AIData.Confidence, (int)npc.AIData.Confidence);

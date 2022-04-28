@@ -32,10 +32,7 @@ namespace AIOverhaulPatcher.Utilities
             if (record == null || state == null) return -1;
 
             return state.LoadOrder.HasMod(record.FormKey.ModKey, true) ? state.LoadOrder.ListedOrder.Select(x => x.ModKey).ToList().IndexOf(record.FormKey.ModKey) : -1;
-        }
-
-        //public static void SetEssential(this NpcConfiguration.Flag Flags , bool value) => Flags = value==Flags.HasFlag(NpcConfiguration.Flag.Essential)?Flags: value ? (Flags & (~NpcConfiguration.Flag.Protected)) | NpcConfiguration.Flag.Essential : (Flags & (~NpcConfiguration.Flag.Essential));
-        //public static void SetProtected(this NpcConfiguration.Flag Flags, bool value, bool ignoreIfEssential = true) => Flags =  value == Flags.HasFlag(NpcConfiguration.Flag.Protected) ||(Flags.HasFlag(NpcConfiguration.Flag.Essential) && ignoreIfEssential)? Flags : value ? (Flags & (~NpcConfiguration.Flag.Essential)) | NpcConfiguration.Flag.Essential : (Flags & (~NpcConfiguration.Flag.Protected));
+        } 
 
         public static bool IsProtected(this INpcGetter npc) => npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.Protected);
         public static bool IsEssential(this INpcGetter npc) => npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.Essential);
