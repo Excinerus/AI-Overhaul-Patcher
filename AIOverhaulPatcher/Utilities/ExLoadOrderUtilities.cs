@@ -31,7 +31,7 @@ namespace AIOverhaulPatcher.Utilities
         {
             if (record == null || state == null) return -1;
 
-            return state.LoadOrder.HasMod(record.FormKey.ModKey, true) ? state.LoadOrder.ListedOrder.Select(x => x.ModKey).ToList().IndexOf(record.FormKey.ModKey) : -1;
+            return state.LoadOrder.ListsMod(record.FormKey.ModKey) ? state.LoadOrder.ListedOrder.Select(x => x.ModKey).ToList().IndexOf(record.FormKey.ModKey) : -1;
         } 
 
         public static bool IsProtected(this INpcGetter npc) => npc.Configuration.Flags.HasFlag(NpcConfiguration.Flag.Protected);
