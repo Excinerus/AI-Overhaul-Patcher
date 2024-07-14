@@ -177,7 +177,7 @@ namespace AIOverhaulPatcher
                     change = true;
                 }
 
-                if (npc.Items!=null)
+                if (npc.Items != null && _settings.Value.MergeItems)
                 {
                     if (patchNpc.Items == null )
                     {
