@@ -231,7 +231,7 @@ namespace AIOverhaulPatcher
             }
             if (state.PatchMod.ModKey.Name == AioPatchName)
             {
-                state.PatchMod.ModHeader.Flags = state.PatchMod.ModHeader.Flags | SkyrimModHeader.HeaderFlag.Light;
+                state.PatchMod.ModHeader.Flags = state.PatchMod.ModHeader.Flags | SkyrimModHeader.HeaderFlag.Small;
             }
         }
     }
